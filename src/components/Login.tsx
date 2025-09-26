@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { config } from '../config/env';
 import './Login.css';
 
 interface LoginProps {
-  onLogin: (username: string, password: string) => void;
+  onLogin: (username: string, password: string) => Promise<boolean>;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
@@ -18,22 +17,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setError('');
 
     try {
-      const response = await fetch(`${config.apiUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
-        },
-        body: JSON.stringify({
-          usuario: username,
-          senha: password
-        })
-      });
-
-      if (response.ok) {
-        await response.json();
-        onLogin(username, password);
-      } else {
+      const success = await onLogin(username, password);
+      if (!success) {
         setError('Usuário ou senha inválidos');
       }
     } catch {

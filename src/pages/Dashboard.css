@@ -1,25 +1,29 @@
 .dashboard {
   display: flex;
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: #f8f9fa;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dashboard-content {
   flex: 1;
   margin-left: 240px;
+  width: calc(100vw - 240px);
+  padding: 0;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .dashboard-content {
     margin-left: 220px;
+    width: calc(100vw - 220px);
   }
 }
 
 @media (max-width: 480px) {
   .dashboard-content {
     margin-left: 200px;
+    width: calc(100vw - 200px);
   }
 }
 
