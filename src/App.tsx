@@ -2,10 +2,6 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
-import Pedidos from './pages/Pedidos';
-import Fornecedores from './pages/Fornecedores';
-import Funcionarios from './pages/Funcionarios';
-import Perfil from './pages/Perfil';
 import './App.css';
 
 function App() {

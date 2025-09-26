@@ -9,7 +9,7 @@ interface LoginPageProps {
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const navigate = useNavigate();
 
-  const handleLogin = (username: string, password: string) => {
+  const handleLogin = (_username: string, _password: string) => {
     console.log('Login realizado com sucesso!');
     // Redireciona para dashboard
     navigate('/dashboard');
