@@ -19,6 +19,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, activeScreen }) => {
       icon: 'inventory_2'
     },
     {
+      id: 'aliquotas',
+      label: 'Alíquotas',
+      icon: 'account_balance'
+    },
+    {
       id: 'funcionarios',
       label: 'Funcionários',
       icon: 'people'

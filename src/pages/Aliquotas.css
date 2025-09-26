@@ -1,8 +1,8 @@
 /* Container principal */
-.fornecedores-container {
+.aliquotas-container {
   width: 100%;
   min-height: 100vh;
-  background-color: #f2f1f1;
+  background-color: #eaeaea;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -52,8 +52,7 @@
   justify-content: space-between;
 }
 
-/* Search and Filter - agora dentro do header */
-
+/* Search and Filter */
 .search-container {
   display: flex;
   align-items: center;
@@ -152,12 +151,12 @@
   padding: 0;
 }
 
-.fornecedores-table {
+.aliquotas-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.fornecedores-table th {
+.aliquotas-table th {
   background: #1a1a1a;
   padding: 0.5rem 1rem;
   text-align: left;
@@ -170,7 +169,7 @@
   letter-spacing: 0.025em;
 }
 
-.fornecedores-table td {
+.aliquotas-table td {
   padding: 0.5rem 1rem;
   border-bottom: 2px solid #f3f4f6;
   color: #000000;
@@ -178,63 +177,71 @@
   vertical-align: middle;
 }
 
-.fornecedores-table tr:hover {
+.aliquotas-table tr:hover {
   background: #f9fafb;
 }
 
 /* Alinhamento específico das colunas */
-.fornecedores-table th:first-child,
-.fornecedores-table td:first-child {
+.aliquotas-table th:first-child,
+.aliquotas-table td:first-child {
   text-align: left;
   width: 50px;
   padding: 0.5rem 0.75rem 0.5rem 0.75rem;
 }
 
-.fornecedores-table th:nth-child(2),
-.fornecedores-table td:nth-child(2) {
+.aliquotas-table th:nth-child(2),
+.aliquotas-table td:nth-child(2) {
   text-align: left;
 }
 
-.fornecedores-table th:nth-child(3),
-.fornecedores-table td:nth-child(3) {
-  text-align: left;
-}
-
-.fornecedores-table th:nth-child(4),
-.fornecedores-table td:nth-child(4) {
+.aliquotas-table th:nth-child(3),
+.aliquotas-table td:nth-child(3),
+.aliquotas-table th:nth-child(4),
+.aliquotas-table td:nth-child(4),
+.aliquotas-table th:nth-child(5),
+.aliquotas-table td:nth-child(5),
+.aliquotas-table th:nth-child(6),
+.aliquotas-table td:nth-child(6),
+.aliquotas-table th:nth-child(7),
+.aliquotas-table td:nth-child(7),
+.aliquotas-table th:nth-child(8),
+.aliquotas-table td:nth-child(8) {
   text-align: center;
 }
 
-.fornecedores-table th:nth-child(5),
-.fornecedores-table td:nth-child(5) {
-  text-align: left;
-}
-
-.fornecedores-table th:last-child,
-.fornecedores-table td:last-child {
+.aliquotas-table th:last-child,
+.aliquotas-table td:last-child {
   text-align: center;
   width: 100px;
 }
 
-/* Badges de origem */
-.origem-nacional {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  background: #dcfce7;
-  color: #166534;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+/* Estilos específicos das células */
+.id-cell {
+  font-weight: 600;
+  color: #6c757d;
+  width: 60px;
+  text-align: left;
+  padding-left: 20px;
+  font-size: 0.85rem;
+}
+
+.ncm-cell {
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: left;
+}
+
+.percentage-cell {
+  color: #495057;
+  text-align: center;
   font-weight: 500;
 }
 
-.origem-importado {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  background: #eff6ff;
-  color: #1d4ed8;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
+.total-cell {
+  color: #1a1a1a;
+  text-align: center;
+  font-weight: 600;
+  background-color: #f8f9fa;
 }
 
 /* Botões de ação */
@@ -397,8 +404,7 @@
   color: #000000;
 }
 
-.form-group input,
-.form-group select {
+.form-group input {
   width: 100%;
   padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
@@ -407,11 +413,16 @@
   color: #000000;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.form-group input:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.readonly-input {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
 }
 
 .form-actions {
@@ -438,13 +449,13 @@
 
 .btn-save {
   flex: 1;
-  padding: 0.5rem 1rem;
+  padding: 8px 16px;
   background: #1f2937;
   border: none;
   border-radius: 6px;
   color: white;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
 }
 
 .btn-save:hover {
@@ -504,7 +515,7 @@
   line-height: 1.4;
 }
 
-.fornecedor-info {
+.aliquota-info {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
@@ -515,13 +526,13 @@
   gap: 2px;
 }
 
-.fornecedor-info strong {
+.aliquota-info strong {
   color: #1f2937;
   font-size: 0.9rem;
   font-weight: 600;
 }
 
-.fornecedor-info span {
+.aliquota-info span {
   color: #6b7280;
   font-size: 0.8rem;
 }
@@ -560,7 +571,7 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .fornecedores-container {
+  .aliquotas-container {
     width: 100%;
   }
   
@@ -597,7 +608,7 @@
 }
 
 @media (max-width: 480px) {
-  .fornecedores-container {
+  .aliquotas-container {
     width: 100%;
   }
   

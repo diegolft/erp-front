@@ -110,6 +110,14 @@ function App() {
             } 
           />
           <Route 
+            path="/aliquotas" 
+            element={
+              isAuthenticated ? 
+              <Dashboard activeScreen="aliquotas" onLogout={handleLogout} /> : 
+              <Navigate to="/login" replace />
+            } 
+          />
+          <Route 
             path="/dashboard" 
             element={
               isAuthenticated ? 

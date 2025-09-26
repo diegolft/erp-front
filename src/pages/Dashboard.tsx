@@ -5,6 +5,7 @@ import Pedidos from './Pedidos';
 import Fornecedores from './Fornecedores';
 import Funcionarios from './Funcionarios';
 import Perfil from './Perfil';
+import Aliquotas from './Aliquotas';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -48,6 +49,8 @@ const Dashboard: React.FC<DashboardProps> = ({ activeScreen = 'pedidos', onLogou
         return <Funcionarios />;
       case 'perfil':
         return <Perfil />;
+      case 'aliquotas':
+        return <Aliquotas />;
       case 'dashboard':
         return (
           <div className="page-container">

@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import './Fornecedores.css';
+import './Aliquotas.css';
 
-interface Fornecedor {
+interface Aliquota {
   id: number;
-  empresa: string;
-  fornecedor: string;
-  origem: string;
-  comprador: string;
+  ncm: string;
+  ii: number;
+  ipi: number;
+  pis: number;
+  cofins: number;
+  icms: number;
+  totalNcm: number;
 }
 
 const API_BASE_URL = 'https://daphne-womanish-tate.ngrok-free.dev/api';
@@ -16,8 +19,8 @@ const getAuthToken = () => {
   return localStorage.getItem('authToken') || '';
 };
 
-const Fornecedores: React.FC = () => {
-  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
+const Aliquotas: React.FC = () => {
+  const [aliquotas, setAliquotas] = useState<Aliquota[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,16 +29,19 @@ const Fornecedores: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [fornecedorToDelete, setFornecedorToDelete] = useState<Fornecedor | null>(null);
+  const [aliquotaToDelete, setAliquotaToDelete] = useState<Aliquota | null>(null);
   const [formData, setFormData] = useState({
-    empresa: '',
-    fornecedor: '',
-    origem: 'Nacional',
-    comprador: ''
+    ncm: '',
+    ii: 0,
+    ipi: 0,
+    pis: 0,
+    cofins: 0,
+    icms: 0,
+    totalNcm: 0
   });
 
   // Funções da API
-  const fetchFornecedores = async () => {
+  const fetchAliquotas = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -46,7 +52,7 @@ const Fornecedores: React.FC = () => {
         return;
       }
       
-      const response = await fetch(`${API_BASE_URL}/fornecedores`, {
+      const response = await fetch(`${API_BASE_URL}/aliquotas`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
           'Authorization': `Bearer ${token}`,
@@ -58,9 +64,9 @@ const Fornecedores: React.FC = () => {
         const data = await response.json();
         
         if (Array.isArray(data)) {
-          setFornecedores(data);
-        } else if (data && typeof data === 'object' && Array.isArray(data.fornecedores)) {
-          setFornecedores(data.fornecedores);
+          setAliquotas(data);
+        } else if (data && typeof data === 'object' && Array.isArray(data.aliquotas)) {
+          setAliquotas(data.aliquotas);
         } else {
           setError(`Formato de resposta inválido do servidor`);
         }
@@ -78,50 +84,50 @@ const Fornecedores: React.FC = () => {
     }
   };
 
-  const createFornecedor = async (fornecedorData: Omit<Fornecedor, 'id'>) => {
+  const createAliquota = async (aliquotaData: Omit<Aliquota, 'id'>) => {
     try {
       const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/fornecedores`, {
+      const response = await fetch(`${API_BASE_URL}/aliquotas`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(fornecedorData)
+        body: JSON.stringify(aliquotaData)
       });
       if (response.ok) {
-        await fetchFornecedores();
+        await fetchAliquotas();
       }
     } catch (error) {
-      console.error('Erro ao criar fornecedor:', error);
+      console.error('Erro ao criar alíquota:', error);
     }
   };
 
-  const updateFornecedor = async (id: number, fornecedorData: Partial<Fornecedor>) => {
+  const updateAliquota = async (id: number, aliquotaData: Partial<Aliquota>) => {
     try {
       const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/fornecedores/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/aliquotas/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(fornecedorData)
+        body: JSON.stringify(aliquotaData)
       });
       if (response.ok) {
-        await fetchFornecedores();
+        await fetchAliquotas();
       }
     } catch (error) {
-      console.error('Erro ao atualizar fornecedor:', error);
+      console.error('Erro ao atualizar alíquota:', error);
     }
   };
 
-  const deleteFornecedor = async (id: number) => {
+  const deleteAliquota = async (id: number) => {
     try {
       const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/fornecedores/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/aliquotas/${id}`, {
         method: 'DELETE',
         headers: {
           'ngrok-skip-browser-warning': 'true',
@@ -130,26 +136,29 @@ const Fornecedores: React.FC = () => {
         }
       });
       if (response.ok) {
-        await fetchFornecedores();
+        await fetchAliquotas();
       }
     } catch (error) {
-      console.error('Erro ao deletar fornecedor:', error);
+      console.error('Erro ao deletar alíquota:', error);
     }
   };
 
   // Carrega os dados ao montar o componente
   useEffect(() => {
-    fetchFornecedores();
+    fetchAliquotas();
   }, []);
 
   const handleOpenModal = () => {
     setIsEditing(false);
     setEditingId(null);
     setFormData({
-      empresa: '',
-      fornecedor: '',
-      origem: 'Nacional',
-      comprador: ''
+      ncm: '',
+      ii: 0,
+      ipi: 0,
+      pis: 0,
+      cofins: 0,
+      icms: 0,
+      totalNcm: 0
     });
     setIsModalOpen(true);
   };
@@ -159,85 +168,100 @@ const Fornecedores: React.FC = () => {
     setIsEditing(false);
     setEditingId(null);
     setFormData({
-      empresa: '',
-      fornecedor: '',
-      origem: 'Nacional',
-      comprador: ''
+      ncm: '',
+      ii: 0,
+      ipi: 0,
+      pis: 0,
+      cofins: 0,
+      icms: 0,
+      totalNcm: 0
     });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const numericValue = name !== 'ncm' ? parseFloat(value) || 0 : value;
+    
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [name]: numericValue
+      };
+      
+      // Calcular total NCM automaticamente
+      if (name !== 'ncm' && name !== 'totalNcm') {
+        updated.totalNcm = updated.ii + updated.ipi + updated.pis + updated.cofins + updated.icms;
+      }
+      
+      return updated;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isEditing && editingId) {
-      await updateFornecedor(editingId, formData);
+      await updateAliquota(editingId, formData);
     } else {
-      await createFornecedor(formData);
+      await createAliquota(formData);
     }
     handleCloseModal();
   };
 
-  const handleEdit = (fornecedor: Fornecedor) => {
+  const handleEdit = (aliquota: Aliquota) => {
     setIsEditing(true);
-    setEditingId(fornecedor.id);
+    setEditingId(aliquota.id);
     setFormData({
-      empresa: fornecedor.empresa,
-      fornecedor: fornecedor.fornecedor,
-      origem: fornecedor.origem,
-      comprador: fornecedor.comprador
+      ncm: aliquota.ncm,
+      ii: aliquota.ii,
+      ipi: aliquota.ipi,
+      pis: aliquota.pis,
+      cofins: aliquota.cofins,
+      icms: aliquota.icms,
+      totalNcm: aliquota.totalNcm
     });
     setIsModalOpen(true);
   };
 
-  const handleDelete = (fornecedor: Fornecedor) => {
-    setFornecedorToDelete(fornecedor);
+  const handleDelete = (aliquota: Aliquota) => {
+    setAliquotaToDelete(aliquota);
     setIsDeleteModalOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (fornecedorToDelete) {
-      await deleteFornecedor(fornecedorToDelete.id);
+    if (aliquotaToDelete) {
+      await deleteAliquota(aliquotaToDelete.id);
       setIsDeleteModalOpen(false);
-      setFornecedorToDelete(null);
+      setAliquotaToDelete(null);
     }
   };
 
   const cancelDelete = () => {
     setIsDeleteModalOpen(false);
-    setFornecedorToDelete(null);
+    setAliquotaToDelete(null);
   };
 
-  // Filtrar fornecedores baseado no termo de busca
-  const filteredFornecedores = fornecedores.filter(fornecedor =>
-    fornecedor.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fornecedor.fornecedor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fornecedor.comprador.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filtrar alíquotas baseado no termo de busca
+  const filteredAliquotas = aliquotas.filter(aliquota =>
+    aliquota.ncm.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="fornecedores-container">
+    <div className="aliquotas-container">
       {/* Header Card */}
       <div className="header-card">
         <div className="header-content">
           <div className="header-title">
             <span className="material-symbols-outlined header-icon">
-              inventory_2
+              account_balance
             </span>
-            <h1>Fornecedores</h1>
+            <h1>Alíquotas</h1>
           </div>
           
           <div className="header-actions">
             <div className="search-container">
               <input
                 type="text"
-                placeholder="Buscar fornecedores..."
+                placeholder="Buscar por NCM..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
@@ -255,7 +279,7 @@ const Fornecedores: React.FC = () => {
               </button>
               <button className="new-button" onClick={handleOpenModal}>
                 <span className="material-symbols-outlined">add</span>
-                Novo Fornecedor
+                Nova Alíquota
               </button>
             </div>
           </div>
@@ -268,54 +292,56 @@ const Fornecedores: React.FC = () => {
           {loading ? (
             <div className="loading-container">
               <div className="loading-spinner"></div>
-              <p>Carregando fornecedores...</p>
+              <p>Carregando alíquotas...</p>
             </div>
           ) : error ? (
             <div className="error-container">
               <p>Erro: {error}</p>
-              <button onClick={fetchFornecedores} className="retry-button">
+              <button onClick={fetchAliquotas} className="retry-button">
                 Tentar novamente
               </button>
             </div>
-          ) : filteredFornecedores.length === 0 ? (
+          ) : filteredAliquotas.length === 0 ? (
             <div className="empty-container">
-              <p>Nenhum fornecedor encontrado.</p>
+              <p>Nenhuma alíquota encontrada.</p>
             </div>
           ) : (
-            <table className="fornecedores-table">
+            <table className="aliquotas-table">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Empresa</th>
-                  <th>Fornecedor</th>
-                  <th>Origem</th>
-                  <th>Comprador</th>
+                  <th>NCM</th>
+                  <th>II (%)</th>
+                  <th>IPI (%)</th>
+                  <th>PIS (%)</th>
+                  <th>COFINS (%)</th>
+                  <th>ICMS (%)</th>
+                  <th>Total NCM (%)</th>
                   <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredFornecedores.map((fornecedor) => (
-                  <tr key={fornecedor.id}>
-                    <td className="id-cell">{fornecedor.id}</td>
-                    <td className="empresa-cell">{fornecedor.empresa}</td>
-                    <td className="fornecedor-cell">{fornecedor.fornecedor}</td>
-                    <td className="origem-cell">
-                      <span className={fornecedor.origem === 'Nacional' ? 'origem-nacional' : 'origem-importado'}>
-                        {fornecedor.origem}
-                      </span>
-                    </td>
-                    <td className="comprador-cell">{fornecedor.comprador}</td>
+                {filteredAliquotas.map((aliquota) => (
+                  <tr key={aliquota.id}>
+                    <td className="id-cell">{aliquota.id}</td>
+                    <td className="ncm-cell">{aliquota.ncm}</td>
+                    <td className="percentage-cell">{aliquota.ii}%</td>
+                    <td className="percentage-cell">{aliquota.ipi}%</td>
+                    <td className="percentage-cell">{aliquota.pis}%</td>
+                    <td className="percentage-cell">{aliquota.cofins}%</td>
+                    <td className="percentage-cell">{aliquota.icms}%</td>
+                    <td className="total-cell">{aliquota.totalNcm}%</td>
                     <td className="actions-cell">
                       <div className="action-buttons">
                         <button 
                           className="action-button edit"
-                          onClick={() => handleEdit(fornecedor)}
+                          onClick={() => handleEdit(aliquota)}
                         >
                           <span className="material-symbols-outlined">edit</span>
                         </button>
                         <button 
                           className="action-button delete"
-                          onClick={() => handleDelete(fornecedor)}
+                          onClick={() => handleDelete(aliquota)}
                         >
                           <span className="material-symbols-outlined">delete</span>
                         </button>
@@ -334,7 +360,7 @@ const Fornecedores: React.FC = () => {
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{isEditing ? 'Editar Fornecedor' : 'Novo Fornecedor'}</h2>
+              <h2>{isEditing ? 'Editar Alíquota' : 'Nova Alíquota'}</h2>
               <button className="modal-close" onClick={handleCloseModal}>
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -342,51 +368,96 @@ const Fornecedores: React.FC = () => {
             
             <form onSubmit={handleSubmit} className="modal-form">
               <div className="form-group">
-                <label htmlFor="empresa">Empresa</label>
+                <label htmlFor="ncm">NCM</label>
                 <input
                   type="text"
-                  id="empresa"
-                  name="empresa"
-                  value={formData.empresa}
+                  id="ncm"
+                  name="ncm"
+                  value={formData.ncm}
                   onChange={handleInputChange}
                   required
                 />
               </div>
               
               <div className="form-group">
-                <label htmlFor="fornecedor">Fornecedor</label>
+                <label htmlFor="ii">II (%)</label>
                 <input
-                  type="text"
-                  id="fornecedor"
-                  name="fornecedor"
-                  value={formData.fornecedor}
+                  type="number"
+                  id="ii"
+                  name="ii"
+                  value={formData.ii}
                   onChange={handleInputChange}
+                  min="0"
+                  step="0.01"
                   required
                 />
               </div>
               
               <div className="form-group">
-                <label htmlFor="origem">Origem</label>
-                <select
-                  id="origem"
-                  name="origem"
-                  value={formData.origem}
+                <label htmlFor="ipi">IPI (%)</label>
+                <input
+                  type="number"
+                  id="ipi"
+                  name="ipi"
+                  value={formData.ipi}
                   onChange={handleInputChange}
+                  min="0"
+                  step="0.01"
                   required
-                >
-                  <option value="Nacional">Nacional</option>
-                  <option value="Importado">Importado</option>
-                </select>
+                />
               </div>
               
               <div className="form-group">
-                <label htmlFor="comprador">Comprador</label>
+                <label htmlFor="pis">PIS (%)</label>
                 <input
-                  type="text"
-                  id="comprador"
-                  name="comprador"
-                  value={formData.comprador}
+                  type="number"
+                  id="pis"
+                  name="pis"
+                  value={formData.pis}
                   onChange={handleInputChange}
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="cofins">COFINS (%)</label>
+                <input
+                  type="number"
+                  id="cofins"
+                  name="cofins"
+                  value={formData.cofins}
+                  onChange={handleInputChange}
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="icms">ICMS (%)</label>
+                <input
+                  type="number"
+                  id="icms"
+                  name="icms"
+                  value={formData.icms}
+                  onChange={handleInputChange}
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="totalNcm">Total NCM (%)</label>
+                <input
+                  type="number"
+                  id="totalNcm"
+                  name="totalNcm"
+                  value={formData.totalNcm}
+                  readOnly
+                  className="readonly-input"
                 />
               </div>
               
@@ -404,7 +475,7 @@ const Fornecedores: React.FC = () => {
       )}
 
       {/* Modal de Confirmação de Exclusão */}
-      {isDeleteModalOpen && fornecedorToDelete && (
+      {isDeleteModalOpen && aliquotaToDelete && (
         <div className="modal-overlay" onClick={cancelDelete}>
           <div className="delete-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="delete-modal-header">
@@ -415,10 +486,10 @@ const Fornecedores: React.FC = () => {
             </div>
             
             <div className="delete-modal-body">
-              <p>Tem certeza que deseja excluir o fornecedor:</p>
-              <div className="fornecedor-info">
-                <strong>{fornecedorToDelete.empresa}</strong>
-                <span>{fornecedorToDelete.fornecedor}</span>
+              <p>Tem certeza que deseja excluir a alíquota:</p>
+              <div className="aliquota-info">
+                <strong>NCM: {aliquotaToDelete.ncm}</strong>
+                <span>Total: {aliquotaToDelete.totalNcm}%</span>
               </div>
               <p className="warning-text">Esta ação não pode ser desfeita.</p>
             </div>
@@ -438,4 +509,4 @@ const Fornecedores: React.FC = () => {
   );
 };
 
-export default Fornecedores;
+export default Aliquotas;
