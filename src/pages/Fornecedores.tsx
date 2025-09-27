@@ -21,6 +21,7 @@ const Fornecedores: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filteredTerm, setFilteredTerm] = useState('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -214,12 +215,35 @@ const Fornecedores: React.FC = () => {
     setFornecedorToDelete(null);
   };
 
+  // Função para normalizar texto removendo acentos
+  const normalizeText = (text: string) => {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  };
+
   // Filtrar fornecedores baseado no termo de busca
-  const filteredFornecedores = fornecedores.filter(fornecedor =>
-    fornecedor.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fornecedor.fornecedor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fornecedor.comprador.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredFornecedores = fornecedores.filter(fornecedor => {
+    const searchTerm = normalizeText(filteredTerm);
+    return (
+      normalizeText(fornecedor.empresa).includes(searchTerm) ||
+      normalizeText(fornecedor.fornecedor).includes(searchTerm) ||
+      normalizeText(fornecedor.origem).includes(searchTerm) ||
+      normalizeText(fornecedor.comprador).includes(searchTerm) ||
+      fornecedor.id.toString().includes(filteredTerm)
+    );
+  });
+
+  const handleSearch = () => {
+    setFilteredTerm(searchTerm);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <div className="fornecedores-container">
@@ -237,22 +261,19 @@ const Fornecedores: React.FC = () => {
             <div className="search-container">
               <input
                 type="text"
-                placeholder="Buscar fornecedores..."
+                placeholder="Buscar por empresa, fornecedor, origem, comprador ou ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyPress}
                 className="search-input"
               />
-              <button className="search-button">
+              <button className="search-button" onClick={handleSearch}>
                 <span className="material-symbols-outlined">search</span>
                 Buscar
               </button>
             </div>
             
             <div className="filter-actions">
-              <button className="filter-button">
-                <span className="material-symbols-outlined">tune</span>
-                Filtros
-              </button>
               <button className="new-button" onClick={handleOpenModal}>
                 <span className="material-symbols-outlined">add</span>
                 Novo Fornecedor
@@ -294,8 +315,8 @@ const Fornecedores: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredFornecedores.map((fornecedor) => (
-                  <tr key={fornecedor.id}>
+                {filteredFornecedores.map((fornecedor, index) => (
+                  <tr key={fornecedor.id} style={{ animationDelay: `${index * 0.1}s` }} className="table-row-animated">
                     <td className="id-cell">{fornecedor.id}</td>
                     <td className="empresa-cell">{fornecedor.empresa}</td>
                     <td className="fornecedor-cell">{fornecedor.fornecedor}</td>

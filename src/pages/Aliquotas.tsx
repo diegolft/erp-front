@@ -24,6 +24,7 @@ const Aliquotas: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filteredTerm, setFilteredTerm] = useState('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -180,29 +181,62 @@ const Aliquotas: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const numericValue = name !== 'ncm' ? parseFloat(value) || 0 : value;
     
-    setFormData(prev => {
-      const updated = {
+    if (name === 'ncm') {
+      setFormData(prev => ({
         ...prev,
-        [name]: numericValue
-      };
+        [name]: value
+      }));
+    } else {
+      // Permitir apenas números, ponto e vírgula
+      let numericValue = value.replace(/[^0-9.,]/g, '');
       
-      // Calcular total NCM automaticamente
-      if (name !== 'ncm' && name !== 'totalNcm') {
-        updated.totalNcm = updated.ii + updated.ipi + updated.pis + updated.cofins + updated.icms;
+      // Limitar a 4 casas decimais
+      const parts = numericValue.split(/[.,]/);
+      if (parts.length === 2 && parts[1].length > 4) {
+        numericValue = parts[0] + '.' + parts[1].substring(0, 4);
       }
       
-      return updated;
-    });
+      setFormData(prev => {
+        const updated = {
+          ...prev,
+          [name]: numericValue
+        };
+        
+        // Calcular total NCM automaticamente
+        if (name !== 'ncm' && name !== 'totalNcm') {
+          const ii = parseFloat(updated.ii.toString().replace(',', '.')) || 0;
+          const ipi = parseFloat(updated.ipi.toString().replace(',', '.')) || 0;
+          const pis = parseFloat(updated.pis.toString().replace(',', '.')) || 0;
+          const cofins = parseFloat(updated.cofins.toString().replace(',', '.')) || 0;
+          const icms = parseFloat(updated.icms.toString().replace(',', '.')) || 0;
+          
+          updated.totalNcm = parseFloat((ii + ipi + pis + cofins + icms).toFixed(4));
+        }
+        
+        return updated;
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Converter valores para float antes de enviar (máximo 4 casas decimais)
+    const formattedData = {
+      ...formData,
+      ii: parseFloat(parseFloat(formData.ii.toString().replace(',', '.')).toFixed(4)) || 0,
+      ipi: parseFloat(parseFloat(formData.ipi.toString().replace(',', '.')).toFixed(4)) || 0,
+      pis: parseFloat(parseFloat(formData.pis.toString().replace(',', '.')).toFixed(4)) || 0,
+      cofins: parseFloat(parseFloat(formData.cofins.toString().replace(',', '.')).toFixed(4)) || 0,
+      icms: parseFloat(parseFloat(formData.icms.toString().replace(',', '.')).toFixed(4)) || 0,
+      totalNcm: parseFloat(parseFloat(formData.totalNcm.toString().replace(',', '.')).toFixed(4)) || 0
+    };
+    
     if (isEditing && editingId) {
-      await updateAliquota(editingId, formData);
+      await updateAliquota(editingId, formattedData);
     } else {
-      await createAliquota(formData);
+      await createAliquota(formattedData);
     }
     handleCloseModal();
   };
@@ -240,10 +274,32 @@ const Aliquotas: React.FC = () => {
     setAliquotaToDelete(null);
   };
 
-  // Filtrar alíquotas baseado no termo de busca
-  const filteredAliquotas = aliquotas.filter(aliquota =>
-    aliquota.ncm.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Função para normalizar texto removendo acentos
+  const normalizeText = (text: string) => {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  };
+
+  // Filtrar alíquotas baseado no termo de busca e calcular total NCM dinamicamente
+  const filteredAliquotas = aliquotas.map(aliquota => ({
+    ...aliquota,
+    totalNcm: Number(aliquota.ii) + Number(aliquota.ipi) + Number(aliquota.pis) + Number(aliquota.cofins) + Number(aliquota.icms)
+  })).filter(aliquota => {
+    const searchTerm = normalizeText(filteredTerm);
+    return normalizeText(aliquota.ncm).includes(searchTerm);
+  });
+
+  const handleSearch = () => {
+    setFilteredTerm(searchTerm);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <div className="aliquotas-container">
@@ -264,19 +320,16 @@ const Aliquotas: React.FC = () => {
                 placeholder="Buscar por NCM..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyPress}
                 className="search-input"
               />
-              <button className="search-button">
+              <button className="search-button" onClick={handleSearch}>
                 <span className="material-symbols-outlined">search</span>
                 Buscar
               </button>
             </div>
             
             <div className="filter-actions">
-              <button className="filter-button">
-                <span className="material-symbols-outlined">tune</span>
-                Filtros
-              </button>
               <button className="new-button" onClick={handleOpenModal}>
                 <span className="material-symbols-outlined">add</span>
                 Nova Alíquota
@@ -321,16 +374,16 @@ const Aliquotas: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredAliquotas.map((aliquota) => (
-                  <tr key={aliquota.id}>
+                {filteredAliquotas.map((aliquota, index) => (
+                  <tr key={aliquota.id} style={{ animationDelay: `${index * 0.1}s` }} className="table-row-animated">
                     <td className="id-cell">{aliquota.id}</td>
                     <td className="ncm-cell">{aliquota.ncm}</td>
-                    <td className="percentage-cell">{aliquota.ii}%</td>
-                    <td className="percentage-cell">{aliquota.ipi}%</td>
-                    <td className="percentage-cell">{aliquota.pis}%</td>
-                    <td className="percentage-cell">{aliquota.cofins}%</td>
-                    <td className="percentage-cell">{aliquota.icms}%</td>
-                    <td className="total-cell">{aliquota.totalNcm}%</td>
+                    <td className="percentage-cell">{Number(aliquota.ii).toFixed(4)}%</td>
+                    <td className="percentage-cell">{Number(aliquota.ipi).toFixed(4)}%</td>
+                    <td className="percentage-cell">{Number(aliquota.pis).toFixed(4)}%</td>
+                    <td className="percentage-cell">{Number(aliquota.cofins).toFixed(4)}%</td>
+                    <td className="percentage-cell">{Number(aliquota.icms).toFixed(4)}%</td>
+                    <td className="total-cell">{Number(aliquota.totalNcm).toFixed(4)}%</td>
                     <td className="actions-cell">
                       <div className="action-buttons">
                         <button 
@@ -382,13 +435,12 @@ const Aliquotas: React.FC = () => {
               <div className="form-group">
                 <label htmlFor="ii">II (%)</label>
                 <input
-                  type="number"
+                  type="text"
                   id="ii"
                   name="ii"
                   value={formData.ii}
                   onChange={handleInputChange}
-                  min="0"
-                  step="0.01"
+                  placeholder="0.0000"
                   required
                 />
               </div>
@@ -396,13 +448,12 @@ const Aliquotas: React.FC = () => {
               <div className="form-group">
                 <label htmlFor="ipi">IPI (%)</label>
                 <input
-                  type="number"
+                  type="text"
                   id="ipi"
                   name="ipi"
                   value={formData.ipi}
                   onChange={handleInputChange}
-                  min="0"
-                  step="0.01"
+                  placeholder="0.0000"
                   required
                 />
               </div>
@@ -410,13 +461,12 @@ const Aliquotas: React.FC = () => {
               <div className="form-group">
                 <label htmlFor="pis">PIS (%)</label>
                 <input
-                  type="number"
+                  type="text"
                   id="pis"
                   name="pis"
                   value={formData.pis}
                   onChange={handleInputChange}
-                  min="0"
-                  step="0.01"
+                  placeholder="0.0000"
                   required
                 />
               </div>
@@ -424,13 +474,12 @@ const Aliquotas: React.FC = () => {
               <div className="form-group">
                 <label htmlFor="cofins">COFINS (%)</label>
                 <input
-                  type="number"
+                  type="text"
                   id="cofins"
                   name="cofins"
                   value={formData.cofins}
                   onChange={handleInputChange}
-                  min="0"
-                  step="0.01"
+                  placeholder="0.0000"
                   required
                 />
               </div>
@@ -438,26 +487,13 @@ const Aliquotas: React.FC = () => {
               <div className="form-group">
                 <label htmlFor="icms">ICMS (%)</label>
                 <input
-                  type="number"
+                  type="text"
                   id="icms"
                   name="icms"
                   value={formData.icms}
                   onChange={handleInputChange}
-                  min="0"
-                  step="0.01"
+                  placeholder="0.0000"
                   required
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="totalNcm">Total NCM (%)</label>
-                <input
-                  type="number"
-                  id="totalNcm"
-                  name="totalNcm"
-                  value={formData.totalNcm}
-                  readOnly
-                  className="readonly-input"
                 />
               </div>
               
@@ -489,7 +525,7 @@ const Aliquotas: React.FC = () => {
               <p>Tem certeza que deseja excluir a alíquota:</p>
               <div className="aliquota-info">
                 <strong>NCM: {aliquotaToDelete.ncm}</strong>
-                <span>Total: {aliquotaToDelete.totalNcm}%</span>
+                <span>Total: {(Number(aliquotaToDelete.ii) + Number(aliquotaToDelete.ipi) + Number(aliquotaToDelete.pis) + Number(aliquotaToDelete.cofins) + Number(aliquotaToDelete.icms)).toFixed(4)}%</span>
               </div>
               <p className="warning-text">Esta ação não pode ser desfeita.</p>
             </div>
