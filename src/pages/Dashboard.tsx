@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Pedidos from './Pedidos';
 import Fornecedores from './Fornecedores';
-import Funcionarios from './Funcionarios';
 import Perfil from './Perfil';
 import Aliquotas from './Aliquotas';
 import './Dashboard.css';
@@ -45,8 +44,6 @@ const Dashboard: React.FC<DashboardProps> = ({ activeScreen = 'pedidos', onLogou
         return <Pedidos />;
       case 'fornecedores':
         return <Fornecedores />;
-      case 'funcionarios':
-        return <Funcionarios />;
       case 'perfil':
         return <Perfil />;
       case 'aliquotas':

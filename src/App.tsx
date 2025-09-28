@@ -94,14 +94,6 @@ function App() {
             } 
           />
           <Route 
-            path="/funcionarios" 
-            element={
-              isAuthenticated ? 
-              <Dashboard activeScreen="funcionarios" onLogout={handleLogout} /> : 
-              <Navigate to="/login" replace />
-            } 
-          />
-          <Route 
             path="/perfil" 
             element={
               isAuthenticated ? 
